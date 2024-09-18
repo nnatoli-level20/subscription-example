@@ -7,10 +7,11 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import { WebSocketServer } from "ws";
 import { useServer } from "graphql-ws/lib/use/ws";
+import { PubSub } from "graphql-subscriptions";
+
+const pubsub = new PubSub();
 
 const typeDefs = `#graphql
-  # Comments in GraphQL strings (such as this one) start with the hash (#) symbol.
-
   type Book {
     title: String
     author: String
@@ -21,8 +22,16 @@ const typeDefs = `#graphql
     comment: String
   }
 
+  type MutationResponse {
+    success: Boolean!
+  }
+
   type Query {
     books: [Book]
+  }
+
+  type Mutation {
+    createPost(author: String!, comment: String!): MutationResponse
   }
 
   type Subscription {
@@ -44,6 +53,18 @@ const books = [
 const resolvers = {
   Query: {
     books: () => books,
+  },
+  Mutation: {
+    createPost(parent, args) {
+      console.log(args);
+      pubsub.publish("POST_CREATED", { postCreated: args });
+      return { success: true };
+    },
+  },
+  Subscription: {
+    postCreated: {
+      subscribe: () => pubsub.asyncIterator(["POST_CREATED"]),
+    },
   },
 };
 
