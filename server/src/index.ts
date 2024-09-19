@@ -56,7 +56,6 @@ const resolvers = {
   },
   Mutation: {
     createPost(parent, args) {
-      console.log(args);
       pubsub.publish("POST_CREATED", { postCreated: args });
       return { success: true };
     },
