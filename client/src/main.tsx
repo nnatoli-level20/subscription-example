@@ -1,17 +1,17 @@
 import { createRoot } from "react-dom/client";
-import App from "./App.tsx";
-import "./index.css";
 import {
   ApolloClient,
   InMemoryCache,
   ApolloProvider,
-  gql,
   split,
   HttpLink,
 } from "@apollo/client";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
-import { createClient } from "graphql-ws";
 import { getMainDefinition } from "@apollo/client/utilities";
+import { createClient } from "graphql-ws";
+
+import App from "./App.tsx";
+import "./index.css";
 
 const httpLink = new HttpLink({
   uri: "http://localhost:4000/graphql",
@@ -39,19 +39,6 @@ const client = new ApolloClient({
   link: splitLink,
   cache: new InMemoryCache(),
 });
-
-client
-  .query({
-    query: gql`
-      query GetBooks {
-        books {
-          title
-          author
-        }
-      }
-    `,
-  })
-  .then((result) => console.log(result));
 
 createRoot(document.getElementById("root")!).render(
   <ApolloProvider client={client}>
